@@ -13,8 +13,8 @@ function closeExtraNewTabs() {
 		
 		// Close any new-page-tabs that are not the current one.
 		chrome.tabs.getSelected(null, function(tab) {
-			for(var i =  window.tabs.length - 1; i > 0; i--) {
-				if(window.tabs[i].id !== tab.id && (firstTab.url.indexOf("chrome://newtab/") != -1)) {
+			for(var i = window.tabs.length - 1; i > 0; i--) {
+				if(window.tabs[i].id !== tab.id && (window.tabs[i].url.indexOf("chrome://newtab/") != -1)) {
 					chrome.tabs.remove(window.tabs[i].id);
 				}
 			}
