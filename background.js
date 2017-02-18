@@ -1,26 +1,50 @@
-﻿
+﻿var ChromeNewTabURL = "chrome://newtab/";
 
-function closeExtraNewTabs() {
-	chrome.windows.getAll({populate: true}, function(windows){
-		// Snag the current window from the masses.
-		var window;
-		for(var i = 0; i < windows.length; i++) {
-			if(windows[i].focused) {
-				window = windows[i];
-				break;
+
+function closeExtraNewTabs(tabToPreserve = "") {
+	chrome.tabs.query(
+		{
+			currentWindow: true,
+			active: false,
+			url: ChromeNewTabURL
+		},
+		function(tabs) {
+			for(var i = 0; i < tabs.length; i++) {
+				if(tabsMatch(tabToPreserve, tabs[i]))
+					continue;
+				
+				closeTab(tabs[i]);
 			}
 		}
-		
-		// Close any new-page-tabs that are not the current one.
-		chrome.tabs.getSelected(null, function(tab) {
-			for(var i = window.tabs.length - 1; i > 0; i--) {
-				if(window.tabs[i].id !== tab.id && (window.tabs[i].url.indexOf("chrome://newtab/") != -1)) {
-					chrome.tabs.remove(window.tabs[i].id);
-				}
-			}
-		});
-	});
+	);
 }
+
+function tabsMatch(firstTab, secondTab) {
+	if(!firstTab)
+		return false;
+	if(!secondTab)
+		return false;
+	
+	return (firstTab.id == secondTab.id)
+}
+
+function closeTab(tab) {
+	if(!tab)
+		return;
+	
+	chrome.tabs.remove(
+		tab.id,
+		checkError
+	);
+}
+function checkError() {
+	var lastError = chrome.runtime.lastError; // Check lastError so Chrome doesn't output anything to the console.
+	if(lastError)
+		return false;
+	
+	return true;
+}
+
 
 // Schedule functions for events.
 chrome.tabs.onCreated.addListener(closeExtraNewTabs);
