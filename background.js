@@ -4,9 +4,9 @@
 function closeExtraNewTabs(tabToPreserve = "") {
 	chrome.tabs.query(
 		{
-			currentWindow: true,
-			active: false,
-			url: ChromeNewTabURL
+			"currentWindow": true,
+			"active":        false,
+			"url":           ChromeNewTabURL
 		},
 		function(tabs) {
 			for(var i = 0; i < tabs.length; i++) {
