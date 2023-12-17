@@ -1,8 +1,8 @@
 {
 	"name": "Close Extra New Tabs",
-	"version": "2.0",
+	"version": "3.0",
 	"description": "A Chrome extension to keep only one new open at all times, closing extra ones.",
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"permissions": [
 		"tabs"
 	],
@@ -10,7 +10,7 @@
 		"128": "icon128.png"
 	},
 	"background": {
-		"page": "background.html"
+		"service_worker": "service_worker.js"
 	},
 	"incognito": "split"
 }
