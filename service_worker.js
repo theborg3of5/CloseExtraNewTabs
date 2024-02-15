@@ -1,52 +1,28 @@
-﻿var ChromeNewTabURL = "chrome://newtab/";
+﻿
+/**
+ * Whenever a new tab is created, close any extra new tabs.
+ * https://developer.chrome.com/docs/extensions/reference/api/tabs#event-onCreated
+ * @param {Tab} tab The tab that was just created.
+ */
+chrome.tabs.onCreated.addListener((tab) => closeExtraNewTabs(tab)); // Pass the newly created tab to preserve, so we don't close ALL of them.
 
-
-function closeExtraNewTabs(tabToPreserve = "") {
-	chrome.tabs.query(
-		{
-			"currentWindow": true,
-			"active":        false,
-			"url":           ChromeNewTabURL
-		},
-		function(tabs) {
-			for(var i = 0; i < tabs.length; i++) {
-				if(tabsMatch(tabToPreserve, tabs[i]))
-					continue;
-				
-				closeTab(tabs[i]);
-			}
-		}
-	);
-}
-
-function tabsMatch(firstTab, secondTab) {
-	if(!firstTab)
-		return false;
-	if(!secondTab)
-		return false;
-	
-	return (firstTab.id == secondTab.id)
-}
-
-function closeTab(tab) {
-	if(!tab)
-		return;
-	
-	chrome.tabs.remove(
-		tab.id,
-		checkError
-	);
-}
-function checkError() {
-	var lastError = chrome.runtime.lastError; // Check lastError so Chrome doesn't output anything to the console.
-	if(lastError)
-		return false;
-	
-	return true;
-}
-
-
-// Schedule functions for events.
-chrome.tabs.onCreated.addListener(closeExtraNewTabs);
+/**
+ * Whenever a tab is closed, close any extra new tabs.
+ * https://developer.chrome.com/docs/extensions/reference/api/tabs#event-onRemoved
+ */
 chrome.tabs.onRemoved.addListener(closeExtraNewTabs);
 
+/**
+ * Close any new tabs beyond a single one.
+ * @param {Tab} tabToPreserve If given, we'll never close this tab (on this call).
+ */
+async function closeExtraNewTabs(tabToPreserve = "") {
+	const tabs = await chrome.tabs.query({ "currentWindow": true, "active": false, "url": "chrome://newtab/" });
+
+	for (const tab of tabs) {
+		if (tabToPreserve && (tabToPreserve.id == tab.id))
+			continue;
+		
+		chrome.tabs.remove(tab.id);
+	}
+}
